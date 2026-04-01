@@ -1,0 +1,40 @@
+diff --git a/rust/crates/claw-cli/src/main.rs b/rust/crates/claw-cli/src/main.rs
+index 2b7d6f1..1b48435 100644
+--- a/rust/crates/claw-cli/src/main.rs
++++ b/rust/crates/claw-cli/src/main.rs
+@@ -17,7 +17,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+ 
+ use api::{
+     resolve_startup_auth_source, AuthSource, ClawApiClient, ContentBlockDelta, InputContentBlock,
+-    InputMessage, MessageRequest, MessageResponse, OutputContentBlock,
++    InputMessage, MessageRequest, MessageResponse, OutputContentBlock, ProviderClient,
+     StreamEvent as ApiStreamEvent, ToolChoice, ToolDefinition, ToolResultContentBlock,
+ };
+ 
+@@ -3040,7 +3040,7 @@ impl runtime::PermissionPrompter for CliPermissionPrompter {
+ 
+ struct DefaultRuntimeClient {
+     runtime: tokio::runtime::Runtime,
+-    client: ClawApiClient,
++    client: ProviderClient,
+     model: String,
+     enable_tools: bool,
+     emit_output: bool,
+@@ -3058,10 +3058,15 @@ impl DefaultRuntimeClient {
+         tool_registry: GlobalToolRegistry,
+         progress_reporter: Option<InternalPromptProgressReporter>,
+     ) -> Result<Self, Box<dyn std::error::Error>> {
++        let default_auth = if matches!(api::detect_provider_kind(&model), api::ProviderKind::ClawApi)
++        {
++            Some(resolve_cli_auth_source()?)
++        } else {
++            None
++        };
+         Ok(Self {
+             runtime: tokio::runtime::Runtime::new()?,
+-            client: ClawApiClient::from_auth(resolve_cli_auth_source()?)
+-                .with_base_url(api::read_base_url()),
++            client: ProviderClient::from_model_with_default_auth(&model, default_auth)?,
+             model,
+             enable_tools,
+             emit_output,

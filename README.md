@@ -1,14 +1,10 @@
 # ClawQwen-Code
 
-Setup local simple pour utiliser `claw-code` avec Ollama + Qwen coder, sans dependre d'une API cloud pour la generation.
+Run `claw-code` locally with Ollama + Qwen coder models.
 
-## Objectif
+This repo is designed to make local setup simple and reproducible.
 
-- experience locale complete
-- installation reproductible
-- un seul binaire `claw` connecte a Ollama
-
-## Quickstart
+## Quick Start
 
 ```bash
 git clone https://github.com/Strykix/ClawQwen-Code.git
@@ -16,71 +12,92 @@ cd ClawQwen-Code
 bash scripts/install-local.sh qwen3-coder:30b
 ```
 
-Ensuite:
+Then test:
 
 ```bash
 claw --output-format json -p "Reply with OK only"
 ```
 
-## Ce que contient ce repo
+## What This Repo Includes
 
-- `scripts/install-local.sh`: installe et configure le setup local
-- `patches/claw-ollama-provider.patch`: patch `claw-code` pour activer la selection provider compatible Ollama
+- `scripts/install-local.sh`: one-command local installer
+- `patches/claw-ollama-provider.patch`: patch for `claw-code` provider auto-selection (Ollama-compatible)
 
-## Ce que fait le script
+## What the Installer Does
 
-1. clone ou met a jour `https://github.com/instructkr/claw-code`
-2. applique le patch provider
-3. compile `claw` en release
-4. installe `claw-bin` et un wrapper `claw` dans `~/.local/bin`
-5. pull le modele Ollama choisi
+1. Clones or updates `https://github.com/instructkr/claw-code`
+2. Applies the provider patch
+3. Builds `claw` in release mode
+4. Installs `claw-bin` and a `claw` wrapper in `~/.local/bin`
+5. Pulls the selected Ollama model
 
-Par defaut, le wrapper utilise:
+Default wrapper behavior:
 
 - `OPENAI_BASE_URL=http://127.0.0.1:11434/v1`
 - `OPENAI_API_KEY=ollama`
 - `CLAW_MODEL=qwen3-coder:30b`
 
-## Modeles
+## Model Options
 
-- qualite code max locale: `qwen3-coder:30b`
-- plus rapide sur machine limitee: `qwen2.5-coder:14b`
+- Best local code quality: `qwen3-coder:30b`
+- Faster on limited hardware: `qwen2.5-coder:14b`
 
-Exemple:
+Example:
 
 ```bash
 bash scripts/install-local.sh qwen2.5-coder:14b
 ```
 
-## Prerequis
+## Prerequisites
 
-- Linux/WSL recommande
-- `git`, `curl`, `cargo`, `ollama`
+Recommended: Linux / WSL
 
-Si Rust manque:
+Required tools:
+
+- `git`
+- `curl`
+- `cargo` (Rust)
+- `ollama`
+
+If Rust is missing:
 
 ```bash
 curl -fsSL https://sh.rustup.rs | sh -s -- -y
 source "$HOME/.cargo/env"
 ```
 
-Si Ollama manque:
+If Ollama is missing:
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-## Verification rapide
+## Quick Verification
 
 ```bash
 ollama ps
 claw --output-format json -p "Reply with OK only"
 ```
 
-## Note DNS OAuth
+## Troubleshooting
 
-L'erreur `platform.claw.dev` (NXDOMAIN) n'est pas bloquante pour ce setup local Ollama.
+### `platform.claw.dev` DNS / NXDOMAIN
+
+This is not required for local Ollama mode. You can ignore OAuth endpoints when running fully local.
+
+### `claw` command not found
+
+Add local bin path:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Model is too slow
+
+Use a smaller coder model, for example `qwen2.5-coder:14b`.
 
 ## Disclaimer
 
-Projet communautaire, non affilie a Anthropic, Ollama, ni aux auteurs originaux de `claw-code`.
+Community integration project. Not affiliated with Anthropic, Ollama, or the original `claw-code` authors.
